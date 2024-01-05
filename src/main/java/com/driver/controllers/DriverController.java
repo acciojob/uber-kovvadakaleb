@@ -10,17 +10,35 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/driver")
 public class DriverController {
-	
+
+	@Autowired
+	DriverService driverService;
 	@PostMapping(value = "/register")
-	public ResponseEntity<Void> registerDriver(@RequestParam String mobile, @RequestParam String password){
-		return new ResponseEntity<>(HttpStatus.OK);
+	public ResponseEntity registerDriver(@RequestParam String mobile, @RequestParam String password){
+		driverService.register(mobile,password);
+		return new ResponseEntity("Driver Register Successfully",HttpStatus.OK);
 	}
 	
 	@DeleteMapping(value = "/delete")
-	public void deleteDriver(@RequestParam Integer driverId){
+	public ResponseEntity deleteDriver(@RequestParam("id") Integer driverId){
+		try {
+			driverService.removeDriver(driverId);
+			return new ResponseEntity("Driver Deleted Successfully",HttpStatus.ACCEPTED);
+		}
+		catch(Exception e){
+			return new ResponseEntity(e.getMessage(),HttpStatus.NOT_FOUND);
+		}
+
 	}
 
 	@PutMapping("/status")
-	public void updateStatus(@RequestParam Integer driverId){
+	public ResponseEntity updateStatus(@RequestParam("id") Integer driverId){
+		try {
+			driverService.updateStatus(driverId);
+			return new ResponseEntity("Driver Updated",HttpStatus.ACCEPTED);
+		}
+		catch (Exception e){
+			return new ResponseEntity(e.getMessage(),HttpStatus.NOT_FOUND);
+		}
 	}
 }

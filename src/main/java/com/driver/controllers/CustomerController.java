@@ -11,25 +11,57 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/customer")
 public class CustomerController {
+
+	@Autowired
+	CustomerService customerService;
 	@PostMapping("/register")
-	public ResponseEntity<Void> registerCustomer(@RequestBody Customer customer){
-		return new ResponseEntity<>(HttpStatus.OK);
+	public ResponseEntity registerCustomer(@RequestBody Customer customer){
+		customerService.register(customer);
+		return new ResponseEntity("Customer Registered Successfully",HttpStatus.CREATED);
 	}
 
 	@DeleteMapping("/delete")
-	public void deleteCustomer(@RequestParam Integer customerId){
+	public ResponseEntity deleteCustomer(@RequestParam("id") Integer customerId){
+		try{
+			customerService.deleteCustomer(customerId);
+			return new ResponseEntity("Customer Deleted Successfully",HttpStatus.ACCEPTED);
+		}
+		catch(Exception e){
+			return new ResponseEntity(e.getMessage(),HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@PostMapping("/bookTrip")
-	public ResponseEntity<Integer> bookTrip(@RequestParam Integer customerId, @RequestParam String fromLocation, @RequestParam String toLocation, @RequestParam Integer distanceInKm) throws Exception {
-		return new ResponseEntity<>(bookedTrip.getTripBookingId(), HttpStatus.CREATED);
+	public ResponseEntity bookTrip(@RequestParam("id") Integer customerId, @RequestParam("from") String fromLocation, @RequestParam("to") String toLocation, @RequestParam("d") Integer distanceInKm) throws Exception {
+		try {
+			TripBooking bookedTrip = customerService.bookTrip(customerId, fromLocation, toLocation, distanceInKm);
+			return new ResponseEntity(bookedTrip.getTripBookingId(),HttpStatus.CREATED);
+		}
+		catch (Exception e){
+			return new ResponseEntity(e.getMessage(),HttpStatus.NOT_FOUND);
+		}
+
 	}
 
 	@DeleteMapping("/complete")
-	public void completeTrip(@RequestParam Integer tripId){
+	public ResponseEntity completeTrip(@RequestParam Integer tripId){
+		try {
+			customerService.completeTrip(tripId);
+			return new ResponseEntity("Your Trip was Completed",HttpStatus.OK);
+		}
+		catch(Exception e){
+			return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
 	}
 
 	@DeleteMapping("/cancelTrip")
-	public void cancelTrip(@RequestParam Integer tripId){
+	public ResponseEntity cancelTrip(@RequestParam Integer tripId){
+		try {
+			customerService.cancelTrip(tripId);
+			return new ResponseEntity("Your Trip Cancelled!!!",HttpStatus.OK);
+		}
+		catch (Exception e){
+			return new ResponseEntity(e.getMessage(),HttpStatus.BAD_REQUEST);
+		}
 	}
 }
